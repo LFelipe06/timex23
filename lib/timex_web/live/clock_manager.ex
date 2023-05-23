@@ -6,13 +6,15 @@ defmodule TimexWeb.ClockManager do
     {_, now} = :calendar.local_time()
 
     Process.send_after(self(), :working_working, 1000)
-    {:ok, %{ui_pid: ui, time: Time.from_erl!(now), st: Working}}
+    {:ok, %{ui_pid: ui, time: Time.from_erl!(now), st: Working, mode: Time}}
   end
 
-  def handle_info(:working_working, %{ui_pid: ui, time: time, st: Working} = state) do
+  def handle_info(:working_working, %{ui_pid: ui, time: time, st: Working, mode: mode} = state) do
     Process.send_after(self(), :working_working, 1000)
     time = Time.add(time, 1)
-    GenServer.cast(ui, {:set_time_display, Time.truncate(time, :second) |> Time.to_string })
+    if mode == Time do
+      GenServer.cast(ui, {:set_time_display, Time.truncate(time, :second) |> Time.to_string })
+    end
     {:noreply, state |> Map.put(:time, time) }
   end
 
