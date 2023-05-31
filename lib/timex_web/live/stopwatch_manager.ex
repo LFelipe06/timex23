@@ -12,18 +12,19 @@ defmodule TimexWeb.StopwatchManager do
     mode =
       if mode == Time do
         GenServer.cast(ui, {:set_time_display, count |> Time.truncate(:millisecond) |> Time.to_string |> String.slice(3..-2)})
+
         SWatch
       else
         Time
       end
     {:noreply, %{state | mode: mode}}
   end
-
+  #Para reiniciar el stopwatch
   def handle_info(:"bottom-left", %{ui_pid: ui, st1: Working} = state) do
     GenServer.cast(ui, {:set_time_display, ~T[00:00:00.00] |> Time.truncate(:millisecond) |> Time.to_string |> String.slice(3..-1)})
     {:noreply, %{state | count: ~T[00:00:00.00]}}
   end
-
+  #Iniciar stopwatch
   def handle_info(:"bottom-right", %{st2: Paused, mode: SWatch} = state) do
     Process.send_after(self(), Counting_to_Counting, 10)
     {:noreply, %{state | st2: Counting}}
